@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 4rem auto; text-align: center;">
+    <h1 style="color: #2563eb; margin-bottom: 0.5rem;">SGPA</h1>
+    <p style="color: #6b7280; margin-bottom: 2rem;">Inicie sesión para continuar</p>
+    
+    <form action="{{ url_for('login') }}" method="POST">
+        <div class="form-group" style="text-align: left;">
+            <label for="usuario">Usuario</label>
+            <input type="text" id="usuario" name="usuario" placeholder="Ingrese su usuario">
+        </div>
+        <div class="form-group" style="text-align: left;">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" placeholder="Ingrese su contraseña">
+        </div>
+        <div class="btn-group" style="flex-direction: column;">
+            <button type="submit" class="btn" style="width: 100%;">Iniciar Sesión</button>
+            <!-- Simulamos un botón salir que podría ir a otra página, pero login lo ignora o sale de la app -->
+            <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="window.close()">Salir</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

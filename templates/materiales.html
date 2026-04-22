@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>GESTIÓN DE MATERIALES</h2>
+    
+    <div class="grid-2">
+        <div>
+            <form action="#" method="POST">
+                <div class="form-group">
+                    <label>ID Material (Automático)</label>
+                    <input type="text" disabled value="MAT-001">
+                </div>
+                <div class="form-group">
+                    <label>Nombre del Material</label>
+                    <input type="text" name="nombre_material" placeholder="Nombre">
+                </div>
+                <div class="form-group">
+                    <label>Código del Material</label>
+                    <input type="text" name="codigo_material" placeholder="Código">
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" name="cantidad" value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea name="descripcion" rows="3" placeholder="Descripción breve..."></textarea>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="button" class="btn">Registrar</button>
+                    <button type="button" class="btn btn-secondary">Modificar</button>
+                    <button type="button" class="btn btn-danger">Eliminar</button>
+                    <button type="button" class="btn btn-secondary">Buscar</button>
+                    <button type="reset" class="btn btn-secondary">Limpiar</button>
+                </div>
+            </form>
+        </div>
+        
+        <div>
+            <h3 style="margin-top: 0;">Lista de Materiales</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>LIB-01</td>
+                        <td>Libro de Matemáticas</td>
+                        <td>5</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
