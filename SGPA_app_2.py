@@ -8,7 +8,7 @@ Dependencias:
 
 Pasos para iniciar:
     1. admin
-    2. contraseña:12345
+    2. contraseña:1234
 ============================================================
 """
 
