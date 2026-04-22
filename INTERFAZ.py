@@ -6,6 +6,23 @@ try:
     from tkcalendar import DateEntry
 except ImportError:
     DateEntry = None
+    
+class BackendControlador:
+    def __init__(self):
+        self.usuarios_db = []
+        self.materiales_db = []
+        self.credenciales = {"admin": "1234"}
+
+    def validar_acceso(self, u, p):
+        return u in self.credenciales and self.credenciales[u] == p
+
+    def registrar_usuario(self, nombre, ident, grupo):
+        self.usuarios_db.append({"id": len(self.usuarios_db)+1, "nombre": nombre, "ident": ident, "grupo": grupo})
+        return True
+
+    def registrar_material(self, nombre, codigo, cant, desc):
+        self.materiales_db.append({"codigo": codigo, "nombre": nombre, "cant": cant, "desc": desc})
+        return True
 
 # Custom styling para la aplicación
 def setup_styles():
@@ -39,6 +56,7 @@ class SGPA_App(tk.Tk):
         super().__init__()
         self.title("SGPA - Sistema de Control de Préstamos")
         self.geometry("1024x768")
+        self.backend = BackendControlador()
         self.minsize(1024, 768)
         self.configure(bg="#E0E0E0")
         
@@ -92,18 +110,13 @@ class LoginScreen(ttk.Frame):
         btn_exit.grid(row=4, column=0, columnspan=2, ipadx=20, ipady=5)
         
     def login(self):
-        user = self.entry_user.get().strip()
-        pwd = self.entry_pass.get().strip()
-        
-        # Validaciones de la pantalla de login
-        if not user or not pwd:
-            messagebox.showerror("Error", "No se permiten campos vacíos.")
-        elif user == "admin" and pwd == "1234": # Mock usuario/contraseña
+        user = self.entry_user.get()
+        pasw = self.entry_pass.get()
+        # Reemplazo de lógica:
+        if self.controller.backend.validar_acceso(user, pasw):
             self.controller.show_frame("MainMenu")
-            self.entry_user.delete(0, tk.END)
-            self.entry_pass.delete(0, tk.END)
         else:
-            messagebox.showerror("Error", "Usuario o contraseña incorrectos.\n(Pista: admin / 1234)")
+            messagebox.showerror("Error", "Usuario o contraseña incorrectos")
 
 
 # ---- PANTALLA 2: MENÚ PRINCIPAL ----
@@ -198,6 +211,22 @@ class UserManagement(ttk.Frame):
             self.tree.column(c, anchor="center")
         self.tree.pack(fill="both", expand=True)
         
+    def registrar_usuario(self):
+        nom = self.e_name.get()
+        ide = self.e_ident.get()
+        grp = self.cmb_group.get()
+        if nom and ide and grp:
+            self.controller.backend.registrar_usuario(nom, ide, grp)
+            messagebox.showinfo("Éxito", "Usuario guardado en el Back-end")
+            self.actualizar_tabla()
+        else:
+            messagebox.showwarning("Error", "Completa todos los campos")
+
+    def actualizar_tabla(self):
+        for i in self.tree.get_children(): self.tree.delete(i)
+        for u in self.controller.backend.usuarios_db:
+            self.tree.insert("", "end", values=(u["id"], u["nombre"], u["ident"], u["grupo"]))
+        
     def registrar(self):
         messagebox.showinfo("Registro Exitoso", "El usuario ha sido registrado correctamente.")
         
@@ -270,6 +299,20 @@ class MaterialManagement(ttk.Frame):
             self.tree.heading(c, text=c)
             self.tree.column(c, anchor="center")
         self.tree.pack(fill="both", expand=True)
+        
+    def registrar_material(self):
+        nom = self.e_m_name.get()
+        cod = self.e_m_code.get()
+        qty = self.spin_qty.get()
+        if nom and cod:
+            self.controller.backend.registrar_material(nom, cod, qty, "Sin desc")
+            messagebox.showinfo("Back-end", "Material registrado")
+            self.actualizar_tabla_mat()
+
+    def actualizar_tabla_mat(self):
+        for i in self.tree.get_children(): self.tree.delete(i)
+        for m in self.controller.backend.materiales_db:
+            self.tree.insert("", "end", values=(m["codigo"], m["nombre"], m["cant"], m["cant"]))
 
     def registrar(self):
         messagebox.showinfo("Registro Exitoso", "Material registrado correctamente.")
