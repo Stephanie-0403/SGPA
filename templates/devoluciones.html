@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2>DEVOLUCIONES</h2>
+    
+    <form action="#" method="POST">
+        <div class="form-group">
+            <label>ID Préstamo</label>
+            <select name="id_prestamo">
+                <option value="">Seleccione un préstamo pendiente...</option>
+                <option value="1">PRE-001 - Juan Pérez (Libro Mat)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Fecha Devolución Real (Automática)</label>
+            <input type="text" disabled value="{{ fecha_actual }}">
+        </div>
+        
+        <div class="btn-group">
+            <button type="button" class="btn">Registrar devolución</button>
+            <button type="reset" class="btn btn-secondary">Cancelar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

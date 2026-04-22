@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2>REPORTES</h2>
+    
+    <form action="#" method="POST">
+        <div class="form-group">
+            <label>Seleccione el tipo de reporte:</label>
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                <label style="font-weight: normal; cursor: pointer;">
+                    <input type="radio" name="tipo_reporte" value="activos" checked>
+                    Reporte de préstamos activos
+                </label>
+                <label style="font-weight: normal; cursor: pointer;">
+                    <input type="radio" name="tipo_reporte" value="historial">
+                    Reporte de historial
+                </label>
+                <label style="font-weight: normal; cursor: pointer;">
+                    <input type="radio" name="tipo_reporte" value="materiales">
+                    Reporte de materiales disponibles
+                </label>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button type="button" class="btn" style="background-color: #ef4444;">Generar PDF</button>
+            <button type="button" class="btn btn-secondary" style="background-color: #10b981;">Exportar (Excel/CSV)</button>
+        </div>
+    </form>
+
+    <div style="margin-top: 2rem;">
+        <h3 style="margin-top: 0;">Vista Previa</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Columna 1</th>
+                    <th>Columna 2</th>
+                    <th>Columna 3</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3" style="text-align: center; color: #6b7280; padding: 2rem;">
+                        Seleccione un reporte y presione generar para ver los datos
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

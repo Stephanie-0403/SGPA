@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card" style="padding: 3rem;">
+    <h2>MENÚ PRINCIPAL</h2>
+    <div class="grid-container">
+        <a href="{{ url_for('usuarios') }}" class="btn menu-btn">Gestión de<br>Usuarios</a>
+        <a href="{{ url_for('materiales') }}" class="btn menu-btn">Gestión de<br>Materiales</a>
+        <a href="{{ url_for('prestamos') }}" class="btn menu-btn">Préstamos</a>
+        <a href="{{ url_for('devoluciones') }}" class="btn menu-btn">Devoluciones</a>
+        <a href="{{ url_for('reportes') }}" class="btn menu-btn">Reportes</a>
+    </div>
+</div>
+{% endblock %}
