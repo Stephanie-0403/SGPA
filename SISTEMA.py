@@ -192,7 +192,7 @@ class UserManagement(ttk.Frame):
         frm_btns = ttk.Frame(frm_left)
         frm_btns.grid(row=5, column=0, columnspan=2, pady=20)
         
-        ttk.Button(frm_btns, text="Registrar", command=self.registrar).grid(row=0, column=0, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Registrar", command=self.registrar_usuario).grid(row=0, column=0, padx=5, pady=5)
         ttk.Button(frm_btns, text="Modificar").grid(row=0, column=1, padx=5, pady=5)
         ttk.Button(frm_btns, text="Eliminar", command=self.eliminar).grid(row=1, column=0, padx=5, pady=5)
         ttk.Button(frm_btns, text="Buscar").grid(row=1, column=1, padx=5, pady=5)
