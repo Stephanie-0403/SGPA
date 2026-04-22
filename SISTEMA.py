@@ -281,7 +281,7 @@ class MaterialManagement(ttk.Frame):
         frm_btns = ttk.Frame(frm_left)
         frm_btns.grid(row=5, column=0, columnspan=2, pady=20)
         
-        ttk.Button(frm_btns, text="Registrar", command=self.registrar).grid(row=0, column=0, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Registrar", command=self.registrar_material)
         ttk.Button(frm_btns, text="Modificar").grid(row=0, column=1, padx=5, pady=5)
         ttk.Button(frm_btns, text="Eliminar", command=self.eliminar).grid(row=1, column=0, padx=5, pady=5)
         ttk.Button(frm_btns, text="Buscar").grid(row=1, column=1, padx=5, pady=5)
@@ -301,23 +301,29 @@ class MaterialManagement(ttk.Frame):
         self.tree.pack(fill="both", expand=True)
         
     def registrar_material(self):
-        nom = self.e_name.get()   # Cambiado de e_m_name a e_name
-        cod = self.e_code.get()   # Cambiado de e_m_code a e_code
+        # Usamos los nombres correctos de las variables del front-end
+        nom = self.e_name.get()   
+        cod = self.e_code.get()   
         qty = self.spin_qty.get()
-        desc = self.txt_desc.get("1.0", tk.END).strip() # Captura la descripción real
+        # Capturamos la descripción del widget tk.Text
+        desc = self.txt_desc.get("1.0", tk.END).strip()
         
         if nom and cod:
+            # Llamada al backend
             self.controller.backend.registrar_material(nom, cod, qty, desc)
-            messagebox.showinfo("Éxito", f"Material '{nom}' registrado en el Back-end")
+            messagebox.showinfo("Éxito", f"Material '{nom}' registrado correctamente.")
             self.actualizar_tabla_mat()
             self.limpiar()
         else:
-            messagebox.showwarning("Error", "Nombre y Código son obligatorios")
+            messagebox.showwarning("Atención", "El nombre y el código son obligatorios.")
 
     def actualizar_tabla_mat(self):
-        for i in self.tree.get_children(): self.tree.delete(i)
+        # Limpiar tabla actual
+        for i in self.tree.get_children(): 
+            self.tree.delete(i)
+        # Llenar con datos del backend
         for m in self.controller.backend.materiales_db:
-            self.tree.insert("", "end", values=(m["codigo"], m["nombre"], m["cant"], m["cant"]))
+            self.tree.insert("", "end", values=(m["codigo"], m["nombre"], m["cant"]))
 
     def registrar(self):
         messagebox.showinfo("Registro Exitoso", "Material registrado correctamente.")
