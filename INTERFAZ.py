@@ -7,50 +7,6 @@ try:
 except ImportError:
     DateEntry = None
 
-
-# SECCIÓN: BACKEND CONTROLADOR 
-
-class BackendControlador:
-    def __init__(self):
-        # Datos iniciales simulados 
-        self.usuarios_db = [
-            {"id": 1, "nombre": "Administrador Global", "ident": "ADMIN-01", "grupo": "Administrativo"}
-        ]
-        self.materiales_db = [
-            {"codigo": "LPT-001", "nombre": "Laptop Dell", "cantidad": 5, "disponible": 5, "desc": "Equipo de oficina"}
-        ]
-        # Credenciales de prueba
-        self.credenciales = {
-            "admin": "1234"
-        }
-
-    def validar_acceso(self, usuario, password):
-        if usuario in self.credenciales and self.credenciales[usuario] == password:
-            return True
-        return False
-
-    def registrar_usuario_db(self, nombre, ident, grupo):
-        nuevo_id = len(self.usuarios_db) + 1
-        self.usuarios_db.append({
-            "id": nuevo_id,
-            "nombre": nombre,
-            "ident": ident,
-            "grupo": grupo
-        })
-        return True
-
-    def registrar_material_db(self, nombre, codigo, cantidad, desc):
-        self.materiales_db.append({
-            "codigo": codigo,
-            "nombre": nombre,
-            "cantidad": cantidad,
-            "disponible": cantidad,
-            "desc": desc
-        })
-        return True
-
-# SECCIÓN: INTERFAZ GRÁFICA 
-
 # Custom styling para la aplicación
 def setup_styles():
     style = ttk.Style()
@@ -76,29 +32,29 @@ def setup_styles():
     
     # Entradas de texto y listas desplegables
     style.configure('TEntry', fieldbackground="white", padding=5)
-    style.configure('TCombobox', fieldbackground="white", selectbackground=btn_color)
+    style.configure('TCombobox', fieldbackground="white", padding=5)
 
 class SGPA_App(tk.Tk):
     def __init__(self):
         super().__init__()
-        
         self.title("SGPA - Sistema de Control de Préstamos")
         self.geometry("1024x768")
-        
-        # INICIALIZACIÓN DEL BACKEND
-        self.backend = BackendControlador()
+        self.minsize(1024, 768)
+        self.configure(bg="#E0E0E0")
         
         setup_styles()
         
-        self.container = ttk.Frame(self)
-        self.container.pack(side="top", fill="both", expand=True)
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
-        
         self.frames = {}
+        
+        container = ttk.Frame(self)
+        container.pack(fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+        
+        # Inicializar todas las pantallas
         for F in (LoginScreen, MainMenu, UserManagement, MaterialManagement, LoanScreen, ReturnScreen, ReportScreen):
             page_name = F.__name__
-            frame = F(parent=self.container, controller=self)
+            frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
             
@@ -107,58 +63,62 @@ class SGPA_App(tk.Tk):
     def show_frame(self, page_name):
         frame = self.frames[page_name]
         frame.tkraise()
-        # Si la pantalla tiene método de actualizar datos al entrar, se llama aquí
-        if hasattr(frame, "actualizar_datos"):
-            frame.actualizar_datos()
 
+# ---- PANTALLA 1: LOGIN ----
 class LoginScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         
-        # Contenedor centrado
-        login_frame = ttk.Frame(self)
-        login_frame.place(relx=0.5, rely=0.5, anchor="center")
+        # Contenedor central
+        inner = ttk.Frame(self)
+        inner.place(relx=0.5, rely=0.5, anchor="center")
         
-        ttk.Label(login_frame, text="SGPA - Sistema de Control de Préstamos", font=('Arial', 18, 'bold')).grid(row=0, column=0, columnspan=2, pady=20)
+        lbl_title = ttk.Label(inner, text="SGPA - Iniciar Sesión", font=('Arial', 18, 'bold'))
+        lbl_title.grid(row=0, column=0, columnspan=2, pady=(0, 20))
         
-        ttk.Label(login_frame, text="Usuario:").grid(row=1, column=0, sticky="e", pady=10, padx=5)
-        self.entry_user = ttk.Entry(login_frame, width=30)
-        self.entry_user.grid(row=1, column=1, pady=10, padx=5)
+        ttk.Label(inner, text="Usuario:").grid(row=1, column=0, sticky="e", pady=10, padx=10)
+        self.entry_user = ttk.Entry(inner, width=25)
+        self.entry_user.grid(row=1, column=1, pady=10, padx=10)
         
-        ttk.Label(login_frame, text="Contraseña:").grid(row=2, column=0, sticky="e", pady=10, padx=5)
-        self.entry_pass = ttk.Entry(login_frame, show="*", width=30)
-        self.entry_pass.grid(row=2, column=1, pady=10, padx=5)
+        ttk.Label(inner, text="Contraseña:").grid(row=2, column=0, sticky="e", pady=10, padx=10)
+        self.entry_pass = ttk.Entry(inner, show="*", width=25)
+        self.entry_pass.grid(row=2, column=1, pady=10, padx=10)
         
-        btn_frame = ttk.Frame(login_frame)
-        btn_frame.grid(row=3, column=0, columnspan=2, pady=20)
+        btn_login = ttk.Button(inner, text="Iniciar sesión", command=self.login)
+        btn_login.grid(row=3, column=0, columnspan=2, pady=(20,10), ipadx=20, ipady=5)
         
-        ttk.Button(btn_frame, text="Iniciar sesión", command=self.login).grid(row=0, column=0, padx=10, ipadx=10, ipady=5)
-        ttk.Button(btn_frame, text="Salir", command=self.quit).grid(row=0, column=1, padx=10, ipadx=10, ipady=5)
+        btn_exit = ttk.Button(inner, text="Salir", command=self.controller.quit)
+        btn_exit.grid(row=4, column=0, columnspan=2, ipadx=20, ipady=5)
         
     def login(self):
-        user = self.entry_user.get()
-        password = self.entry_pass.get()
+        user = self.entry_user.get().strip()
+        pwd = self.entry_pass.get().strip()
         
-        # LLAMADA AL BACKEND
-        if self.controller.backend.validar_acceso(user, password):
+        # Validaciones de la pantalla de login
+        if not user or not pwd:
+            messagebox.showerror("Error", "No se permiten campos vacíos.")
+        elif user == "admin" and pwd == "1234": # Mock usuario/contraseña
             self.controller.show_frame("MainMenu")
             self.entry_user.delete(0, tk.END)
             self.entry_pass.delete(0, tk.END)
         else:
-            messagebox.showerror("Error de autenticación", "Usuario o contraseña incorrectos.")
+            messagebox.showerror("Error", "Usuario o contraseña incorrectos.\n(Pista: admin / 1234)")
 
+
+# ---- PANTALLA 2: MENÚ PRINCIPAL ----
 class MainMenu(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         
-        ttk.Label(self, text="Menú Principal", font=('Arial', 24, 'bold')).pack(pady=50)
+        lbl_title = ttk.Label(self, text="Menú Principal", font=('Arial', 24, 'bold'))
+        lbl_title.pack(pady=50)
         
-        btn_container = ttk.Frame(self)
-        btn_container.pack()
+        btn_frame = ttk.Frame(self)
+        btn_frame.pack()
         
-        menu_items = [
+        buttons = [
             ("Gestión de Usuarios", "UserManagement"),
             ("Gestión de Materiales", "MaterialManagement"),
             ("Préstamos", "LoanScreen"),
@@ -166,190 +126,264 @@ class MainMenu(ttk.Frame):
             ("Reportes", "ReportScreen")
         ]
         
-        for text, target in menu_items:
-            ttk.Button(btn_container, text=text, command=lambda t=target: self.controller.show_frame(t)).pack(fill="x", pady=10, ipadx=80, ipady=10)
-            
-        ttk.Button(self, text="Cerrar Sesión", command=lambda: self.controller.show_frame("LoginScreen")).pack(pady=40, ipadx=10, ipady=5)
+        for text, frame_name in buttons:
+            def create_cmd(f: str):
+                return lambda: self.controller.show_frame(f)
 
+            btn = ttk.Button(btn_frame, text=text, command=create_cmd(frame_name))
+            btn.pack(fill="x", pady=10, ipadx=50, ipady=10)
+            
+        btn_logout = ttk.Button(btn_frame, text="Salir", command=lambda: self.controller.show_frame("LoginScreen"))
+        btn_logout.pack(fill="x", pady=30, ipadx=50, ipady=10)
+
+
+# ---- PANTALLA 3: GESTIÓN DE USUARIOS ----
 class UserManagement(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         
-        ttk.Label(self, text="Gestión de Usuarios", font=('Arial', 20, 'bold')).pack(pady=20)
+        lbl_title = ttk.Label(self, text="Gestión de Usuarios", font=('Arial', 18, 'bold'))
+        lbl_title.pack(pady=20)
         
-        # Formulario
-        form_frame = ttk.Frame(self)
-        form_frame.pack(pady=10)
+        content = ttk.Frame(self)
+        content.pack(fill="both", expand=True, padx=20, pady=10)
         
-        ttk.Label(form_frame, text="Nombre completo:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
-        self.e_name = ttk.Entry(form_frame, width=40)
-        self.e_name.grid(row=0, column=1, pady=5)
+        # --- Formulario (Izquierda) ---
+        frm_left = ttk.Frame(content)
+        frm_left.pack(side="left", fill="y", padx=20)
         
-        ttk.Label(form_frame, text="N° Identificación:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
-        self.e_ident = ttk.Entry(form_frame, width=40)
-        self.e_ident.grid(row=1, column=1, pady=5)
+        ttk.Label(frm_left, text="ID Usuario:").grid(row=0, column=0, sticky="e", pady=5)
+        self.e_id = ttk.Entry(frm_left, state="disabled") # Automático
+        self.e_id.grid(row=0, column=1, pady=5, sticky="w")
         
-        ttk.Label(form_frame, text="Grupo/Categoría:").grid(row=2, column=0, sticky="w", padx=10, pady=5)
-        self.cmb_group = ttk.Combobox(form_frame, values=["Estudiante", "Docente", "Administrativo", "Mantenimiento"], state="readonly", width=37)
-        self.cmb_group.grid(row=2, column=1, pady=5)
+        ttk.Label(frm_left, text="Nombre completo:").grid(row=1, column=0, sticky="e", pady=5)
+        self.e_name = ttk.Entry(frm_left, width=30)
+        self.e_name.grid(row=1, column=1, pady=5, sticky="w")
+        
+        ttk.Label(frm_left, text="Número de identificación:").grid(row=2, column=0, sticky="e", pady=5)
+        self.e_ident = ttk.Entry(frm_left, width=30)
+        self.e_ident.grid(row=2, column=1, pady=5, sticky="w")
+        
+        ttk.Label(frm_left, text="Grupo:").grid(row=3, column=0, sticky="e", pady=5)
+        self.cmb_group = ttk.Combobox(frm_left, values=["Estudiante", "Docente", "Administrativo", "Mantenimiento"], state="readonly")
+        self.cmb_group.grid(row=3, column=1, pady=5, sticky="w")
+        
+        ttk.Label(frm_left, text="Fecha registro:").grid(row=4, column=0, sticky="e", pady=5)
+        self.e_date = ttk.Entry(frm_left, state="normal")
+        self.e_date.insert(0, datetime.now().strftime("%Y-%m-%d"))
+        self.e_date.configure(state="disabled") # Automática
+        self.e_date.grid(row=4, column=1, pady=5, sticky="w")
         
         # Botones de acción
-        btn_action_frame = ttk.Frame(self)
-        btn_action_frame.pack(pady=20)
+        frm_btns = ttk.Frame(frm_left)
+        frm_btns.grid(row=5, column=0, columnspan=2, pady=20)
         
-        ttk.Button(btn_action_frame, text="Registrar", command=self.registrar).grid(row=0, column=0, padx=10, ipadx=10)
-        ttk.Button(btn_action_frame, text="Modificar", command=lambda: None).grid(row=0, column=1, padx=10, ipadx=10)
-        ttk.Button(btn_action_frame, text="Eliminar", command=lambda: None).grid(row=0, column=2, padx=10, ipadx=10)
-        ttk.Button(btn_action_frame, text="Limpiar", command=self.limpiar).grid(row=0, column=3, padx=10, ipadx=10)
+        ttk.Button(frm_btns, text="Registrar", command=self.registrar).grid(row=0, column=0, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Modificar").grid(row=0, column=1, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Eliminar", command=self.eliminar).grid(row=1, column=0, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Buscar").grid(row=1, column=1, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Limpiar", command=self.limpiar).grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
         
-        # Tabla
+        ttk.Button(frm_left, text="Volver al Menú", command=lambda: self.controller.show_frame("MainMenu")).grid(row=6, column=0, columnspan=2, pady=30)
+        
+        # --- Tabla (Derecha) ---
+        frm_right = ttk.Frame(content)
+        frm_right.pack(side="right", fill="both", expand=True)
+        
         cols = ("ID", "Nombre", "Identificación", "Grupo")
-        self.tree = ttk.Treeview(self, columns=cols, show='headings', height=8)
-        for col in cols:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, width=150)
-        self.tree.pack(fill="both", expand=True, padx=30, pady=10)
+        self.tree = ttk.Treeview(frm_right, columns=cols, show="headings")
+        for c in cols:
+            self.tree.heading(c, text=c)
+            self.tree.column(c, anchor="center")
+        self.tree.pack(fill="both", expand=True)
         
-        ttk.Button(self, text="Volver al Menú", command=lambda: self.controller.show_frame("MainMenu")).pack(pady=20, ipadx=10, ipady=5)
-
-    def actualizar_datos(self):
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-        for u in self.controller.backend.usuarios_db:
-            self.tree.insert("", "end", values=(u["id"], u["nombre"], u["ident"], u["grupo"]))
-
     def registrar(self):
-        nombre = self.e_name.get()
-        ident = self.e_ident.get()
-        grupo = self.cmb_group.get()
+        messagebox.showinfo("Registro Exitoso", "El usuario ha sido registrado correctamente.")
         
-        if nombre and ident and grupo:
-            self.controller.backend.registrar_usuario_db(nombre, ident, grupo)
-            messagebox.showinfo("Éxito", f"Usuario {nombre} registrado correctamente.")
-            self.actualizar_datos()
-            self.limpiar()
-        else:
-            messagebox.showwarning("Atención", "Por favor complete todos los campos.")
-
+    def eliminar(self):
+        respuesta = messagebox.askyesno("Confirmación", "¿Está seguro de eliminar este usuario?")
+        if respuesta:
+            messagebox.showinfo("Eliminación Confirmada", "El usuario ha sido eliminado correctamente.")
+            
     def limpiar(self):
         self.e_name.delete(0, tk.END)
         self.e_ident.delete(0, tk.END)
-        self.cmb_group.set('')
+        self.cmb_group.set("")
 
+
+# ---- PANTALLA 4: GESTIÓN DE MATERIALES ----
 class MaterialManagement(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         
-        ttk.Label(self, text="Gestión de Materiales", font=('Arial', 20, 'bold')).pack(pady=20)
+        lbl_title = ttk.Label(self, text="Gestión de Materiales", font=('Arial', 18, 'bold'))
+        lbl_title.pack(pady=20)
         
-        form_frame = ttk.Frame(self)
-        form_frame.pack(pady=10)
+        content = ttk.Frame(self)
+        content.pack(fill="both", expand=True, padx=20, pady=10)
         
-        ttk.Label(form_frame, text="Nombre del Material:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
-        self.e_m_name = ttk.Entry(form_frame, width=40); self.e_m_name.grid(row=0, column=1, pady=5)
+        frm_left = ttk.Frame(content)
+        frm_left.pack(side="left", fill="y", padx=20)
         
-        ttk.Label(form_frame, text="Código/Serial:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
-        self.e_m_code = ttk.Entry(form_frame, width=40); self.e_m_code.grid(row=1, column=1, pady=5)
+        ttk.Label(frm_left, text="ID Material:").grid(row=0, column=0, sticky="e", pady=5)
+        self.e_id = ttk.Entry(frm_left, state="disabled") # Automático
+        self.e_id.grid(row=0, column=1, pady=5, sticky="w")
         
-        ttk.Label(form_frame, text="Cantidad Total:").grid(row=2, column=0, sticky="w", padx=10, pady=5)
-        self.spin_qty = tk.Spinbox(form_frame, from_=1, to=1000, width=38); self.spin_qty.grid(row=2, column=1, pady=5)
+        ttk.Label(frm_left, text="Nombre material:").grid(row=1, column=0, sticky="e", pady=5)
+        self.e_name = ttk.Entry(frm_left, width=30)
+        self.e_name.grid(row=1, column=1, pady=5, sticky="w")
         
-        ttk.Label(form_frame, text="Descripción:").grid(row=3, column=0, sticky="nw", padx=10, pady=5)
-        self.txt_desc = tk.Text(form_frame, width=30, height=3); self.txt_desc.grid(row=3, column=1, pady=5)
+        ttk.Label(frm_left, text="Código material:").grid(row=2, column=0, sticky="e", pady=5)
+        self.e_code = ttk.Entry(frm_left, width=30)
+        self.e_code.grid(row=2, column=1, pady=5, sticky="w")
         
-        btn_frame = ttk.Frame(self)
-        btn_frame.pack(pady=15)
-        ttk.Button(btn_frame, text="Registrar Material", command=self.registrar).grid(row=0, column=0, padx=10, ipadx=10)
-        ttk.Button(btn_frame, text="Limpiar", command=self.limpiar).grid(row=0, column=1, padx=10, ipadx=10)
+        ttk.Label(frm_left, text="Cantidad:").grid(row=3, column=0, sticky="e", pady=5)
+        # Se requiere Spinbox
+        self.spin_qty = tk.Spinbox(frm_left, from_=0, to=1000, width=10, font=('Arial', 11))
+        self.spin_qty.grid(row=3, column=1, pady=5, sticky="w")
         
-        cols = ("Código", "Nombre", "Total", "Disponible")
-        self.tree = ttk.Treeview(self, columns=cols, show='headings', height=8)
-        for col in cols:
-            self.tree.heading(col, text=col)
-        self.tree.pack(fill="both", expand=True, padx=30, pady=10)
+        ttk.Label(frm_left, text="Descripción:").grid(row=4, column=0, sticky="ne", pady=5)
+        # Se requiere TextBox (tk.Text)
+        self.txt_desc = tk.Text(frm_left, width=30, height=4, font=('Arial', 10))
+        self.txt_desc.grid(row=4, column=1, pady=5, sticky="w")
         
-        ttk.Button(self, text="Volver al Menú", command=lambda: self.controller.show_frame("MainMenu")).pack(pady=10)
-
-    def actualizar_datos(self):
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-        for m in self.controller.backend.materiales_db:
-            self.tree.insert("", "end", values=(m["codigo"], m["nombre"], m["cantidad"], m["disponible"]))
+        frm_btns = ttk.Frame(frm_left)
+        frm_btns.grid(row=5, column=0, columnspan=2, pady=20)
+        
+        ttk.Button(frm_btns, text="Registrar", command=self.registrar).grid(row=0, column=0, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Modificar").grid(row=0, column=1, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Eliminar", command=self.eliminar).grid(row=1, column=0, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Buscar").grid(row=1, column=1, padx=5, pady=5)
+        ttk.Button(frm_btns, text="Limpiar", command=self.limpiar).grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
+        
+        ttk.Button(frm_left, text="Volver al Menú", command=lambda: self.controller.show_frame("MainMenu")).grid(row=6, column=0, columnspan=2, pady=20)
+        
+        frm_right = ttk.Frame(content)
+        frm_right.pack(side="right", fill="both", expand=True)
+        
+        # Tabla y columnas
+        cols = ("Código", "Nombre", "Cantidad")
+        self.tree = ttk.Treeview(frm_right, columns=cols, show="headings")
+        for c in cols:
+            self.tree.heading(c, text=c)
+            self.tree.column(c, anchor="center")
+        self.tree.pack(fill="both", expand=True)
 
     def registrar(self):
-        nombre = self.e_m_name.get()
-        codigo = self.e_m_code.get()
-        qty = self.spin_qty.get()
-        desc = self.txt_desc.get("1.0", tk.END).strip()
+        messagebox.showinfo("Registro Exitoso", "Material registrado correctamente.")
         
-        if nombre and codigo:
-            self.controller.backend.registrar_material_db(nombre, codigo, int(qty), desc)
-            messagebox.showinfo("Éxito", "Material registrado en inventario.")
-            self.actualizar_datos()
-            self.limpiar()
-        else:
-            messagebox.showwarning("Faltan datos", "Nombre y Código son obligatorios.")
-
+    def eliminar(self):
+        if messagebox.askyesno("Confirmación", "¿Está seguro de eliminar este material?"):
+            messagebox.showinfo("Eliminación Confirmada", "Material eliminado.")
+            
     def limpiar(self):
-        self.e_m_name.delete(0, tk.END)
-        self.e_m_code.delete(0, tk.END)
+        self.e_name.delete(0, tk.END)
+        self.e_code.delete(0, tk.END)
+        self.spin_qty.delete(0, "end")
+        self.spin_qty.insert(0, "0")
         self.txt_desc.delete("1.0", tk.END)
 
+# ---- PANTALLA 5: PRÉSTAMOS ----
 class LoanScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         
-        ttk.Label(self, text="Préstamos", font=('Arial', 20, 'bold')).pack(pady=20)
+        lbl_title = ttk.Label(self, text="Registro de Préstamos", font=('Arial', 18, 'bold'))
+        lbl_title.pack(pady=30)
         
-        loan_frame = ttk.Frame(self)
-        loan_frame.pack(pady=20)
+        frm_form = ttk.Frame(self)
+        frm_form.pack(pady=10)
         
-        ttk.Label(loan_frame, text="Seleccionar Usuario:").grid(row=0, column=0, pady=10, sticky="e")
-        self.cmb_u = ttk.Combobox(loan_frame, width=40); self.cmb_u.grid(row=0, column=1, padx=10)
+        ttk.Label(frm_form, text="Usuario:").grid(row=0, column=0, sticky="e", pady=10, padx=10)
+        self.cmb_user = ttk.Combobox(frm_form, values=["Usuario 1 (12345)", "Usuario 2 (67890)"], state="readonly", width=30)
+        self.cmb_user.grid(row=0, column=1, pady=10, padx=10)
         
-        ttk.Label(loan_frame, text="Seleccionar Material:").grid(row=1, column=0, pady=10, sticky="e")
-        self.cmb_m = ttk.Combobox(loan_frame, width=40); self.cmb_m.grid(row=1, column=1, padx=10)
+        ttk.Label(frm_form, text="Material:").grid(row=1, column=0, sticky="e", pady=10, padx=10)
+        self.cmb_material = ttk.Combobox(frm_form, values=["Calculadora (Disp: 5)", "Proyector (Disp: 0)"], state="readonly", width=30)
+        self.cmb_material.grid(row=1, column=1, pady=10, padx=10)
         
-        ttk.Label(loan_frame, text="Fecha de Devolución:").grid(row=2, column=0, pady=10, sticky="e")
+        ttk.Label(frm_form, text="Fecha préstamo:").grid(row=2, column=0, sticky="e", pady=10, padx=10)
+        self.e_date_loan = ttk.Entry(frm_form, state="normal", width=33)
+        self.e_date_loan.insert(0, datetime.now().strftime("%Y-%m-%d"))
+        self.e_date_loan.configure(state="disabled") # Automática
+        self.e_date_loan.grid(row=2, column=1, pady=10, padx=10)
+        
+        ttk.Label(frm_form, text="Fecha devolución:").grid(row=3, column=0, sticky="e", pady=10, padx=10)
+        
+        # Uso de tkcalendar si está disponible (Selector de fecha interactivo)
         if DateEntry:
-            self.cal = DateEntry(loan_frame, width=37, background='darkblue', foreground='white', borderwidth=2)
-            self.cal.grid(row=2, column=1, padx=10)
+            self.date_return = DateEntry(frm_form, width=30, background='darkblue', foreground='white', borderwidth=2, date_pattern='yyyy-mm-dd')
+            self.date_return.grid(row=3, column=1, pady=10, padx=10)
         else:
-            self.e_date = ttk.Entry(loan_frame, width=40); self.e_date.grid(row=2, column=1, padx=10)
+            self.date_return = ttk.Entry(frm_form, width=33)
+            self.date_return.insert(0, "YYYY-MM-DD")
+            self.date_return.grid(row=3, column=1, pady=10, padx=10)
             
-        ttk.Button(self, text="Registrar Préstamo", command=lambda: messagebox.showinfo("Préstamo", "Registro exitoso.")).pack(pady=30, ipadx=20, ipady=10)
-        ttk.Button(self, text="Volver al Menú", command=lambda: self.controller.show_frame("MainMenu")).pack()
+        frm_btns = ttk.Frame(frm_form)
+        frm_btns.grid(row=4, column=0, columnspan=2, pady=40)
+        
+        ttk.Button(frm_btns, text="Registrar Préstamo", command=self.registrar).grid(row=0, column=0, padx=10, ipadx=10, ipady=5)
+        ttk.Button(frm_btns, text="Cancelar", command=lambda: self.controller.show_frame("MainMenu")).grid(row=0, column=1, padx=10, ipadx=10, ipady=5)
 
-    def actualizar_datos(self):
-        self.cmb_u['values'] = [u["nombre"] for u in self.controller.backend.usuarios_db]
-        self.cmb_m['values'] = [m["nombre"] for m in self.controller.backend.materiales_db]
+    def registrar(self):
+        material = self.cmb_material.get()
+        if not material:
+            messagebox.showerror("Error de Datos", "Seleccione un material válido.")
+            return
+            
+        # Validación de disponibilidad
+        if "Disp: 0" in material:
+            messagebox.showerror("Error de Disponibilidad", "No hay unidades disponibles de este material para el préstamo.")
+        else:
+            messagebox.showinfo("Préstamo Registrado", "El préstamo se ha registrado de forma exitosa.")
 
+
+# ---- PANTALLA 6: DEVOLUCIONES ----
 class ReturnScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         
-        ttk.Label(self, text="Devoluciones", font=('Arial', 20, 'bold')).pack(pady=20)
+        lbl_title = ttk.Label(self, text="Registro de Devoluciones", font=('Arial', 18, 'bold'))
+        lbl_title.pack(pady=40)
         
-        return_frame = ttk.Frame(self)
-        return_frame.pack(pady=30)
+        frm_form = ttk.Frame(self)
+        frm_form.pack(pady=10)
         
-        ttk.Label(return_frame, text="ID de Préstamo Activo:").grid(row=0, column=0, padx=10)
-        self.cmb_p = ttk.Combobox(return_frame, values=["P-001", "P-002", "P-003"], width=45)
-        self.cmb_p.grid(row=0, column=1, padx=10)
+        ttk.Label(frm_form, text="ID Préstamo:").grid(row=0, column=0, sticky="e", pady=10, padx=10)
+        self.cmb_loan = ttk.Combobox(frm_form, values=["PR-001 (Juan Pérez)", "PR-002 (María Gómez)"], state="readonly", width=30)
+        self.cmb_loan.grid(row=0, column=1, pady=10, padx=10)
         
-        ttk.Button(self, text="Registrar Devolución", command=lambda: messagebox.showinfo("Devolución", "Material devuelto al inventario.")).pack(pady=40, ipadx=20, ipady=10)
-        ttk.Button(self, text="Volver al Menú", command=lambda: self.controller.show_frame("MainMenu")).pack()
+        ttk.Label(frm_form, text="Fecha devolución real:").grid(row=1, column=0, sticky="e", pady=10, padx=10)
+        self.e_date_return = ttk.Entry(frm_form, state="normal", width=33)
+        self.e_date_return.insert(0, datetime.now().strftime("%Y-%m-%d"))
+        self.e_date_return.configure(state="disabled") # Automática
+        self.e_date_return.grid(row=1, column=1, pady=10, padx=10)
+        
+        frm_btns = ttk.Frame(frm_form)
+        frm_btns.grid(row=2, column=0, columnspan=2, pady=40)
+        
+        ttk.Button(frm_btns, text="Registrar Devolución", command=self.registrar).grid(row=0, column=0, padx=10, ipadx=10, ipady=5)
+        ttk.Button(frm_btns, text="Cancelar", command=lambda: self.controller.show_frame("MainMenu")).grid(row=0, column=1, padx=10, ipadx=10, ipady=5)
 
+    def registrar(self):
+        if not self.cmb_loan.get():
+            messagebox.showerror("Error en datos", "Seleccione un préstamo para procesar la devolución.")
+        else:
+            messagebox.showinfo("Devolución Registrada", "La devolución se ha registrado correctamente en el sistema.")
+
+
+# ---- PANTALLA 7: REPORTES ----
 class ReportScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         
-        ttk.Label(self, text="Reportes", font=('Arial', 20, 'bold')).pack(pady=20)
+        lbl_title = ttk.Label(self, text="Generación de Reportes", font=('Arial', 18, 'bold'))
+        lbl_title.pack(pady=40)
         
         frm_opts = ttk.Frame(self)
         frm_opts.pack(pady=20)
@@ -363,11 +397,19 @@ class ReportScreen(ttk.Frame):
         frm_btns = ttk.Frame(self)
         frm_btns.pack(pady=40)
         
-        ttk.Button(frm_btns, text="Generar PDF", command=lambda: messagebox.showinfo("Reporte", "Generando PDF...")).grid(row=0, column=0, padx=10, ipadx=10, ipady=5)
-        ttk.Button(frm_btns, text="Exportar a Excel/CSV", command=lambda: messagebox.showinfo("Exportar", "Archivo guardado.")).grid(row=0, column=1, padx=10, ipadx=10, ipady=5)
+        ttk.Button(frm_btns, text="Generar PDF", command=self.generar).grid(row=0, column=0, padx=10, ipadx=10, ipady=5)
+        ttk.Button(frm_btns, text="Exportar a Excel/CSV", command=self.exportar).grid(row=0, column=1, padx=10, ipadx=10, ipady=5)
         
         ttk.Button(self, text="Volver al Menú", command=lambda: self.controller.show_frame("MainMenu")).pack(pady=20, ipadx=10, ipady=5)
+        
+    def generar(self):
+        messagebox.showinfo("Reporte Generado", f"El archivo PDF para el reporte '{self.report_var.get()}' ha sido generado.")
+        
+    def exportar(self):
+        messagebox.showinfo("Exportación Exitosa", f"Los datos del reporte '{self.report_var.get()}' han sido exportados correctamente.")
 
+
+# Inicialización de la App
 if __name__ == "__main__":
     app = SGPA_App()
     app.mainloop()
