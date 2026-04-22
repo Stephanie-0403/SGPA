@@ -7,19 +7,19 @@ try:
 except ImportError:
     DateEntry = None
 
-# =========================================================
-# SECCIÓN: BACKEND CONTROLADOR (AÑADIDO POR ROSY CORTES)
-# =========================================================
+
+# SECCIÓN: BACKEND CONTROLADOR 
+
 class BackendControlador:
     def __init__(self):
-        # Datos iniciales simulados (Estructura basada en Script-21.sql)
+        # Datos iniciales simulados 
         self.usuarios_db = [
             {"id": 1, "nombre": "Administrador Global", "ident": "ADMIN-01", "grupo": "Administrativo"}
         ]
         self.materiales_db = [
             {"codigo": "LPT-001", "nombre": "Laptop Dell", "cantidad": 5, "disponible": 5, "desc": "Equipo de oficina"}
         ]
-        # Credenciales de prueba según el SQL
+        # Credenciales de prueba
         self.credenciales = {
             "admin": "1234"
         }
@@ -49,9 +49,7 @@ class BackendControlador:
         })
         return True
 
-# =========================================================
-# SECCIÓN: INTERFAZ GRÁFICA (CÓDIGO ORIGINAL SIN RECORTES)
-# =========================================================
+# SECCIÓN: INTERFAZ GRÁFICA 
 
 # Custom styling para la aplicación
 def setup_styles():
