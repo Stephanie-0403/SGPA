@@ -301,13 +301,18 @@ class MaterialManagement(ttk.Frame):
         self.tree.pack(fill="both", expand=True)
         
     def registrar_material(self):
-        nom = self.e_m_name.get()
-        cod = self.e_m_code.get()
+        nom = self.e_name.get()   # Cambiado de e_m_name a e_name
+        cod = self.e_code.get()   # Cambiado de e_m_code a e_code
         qty = self.spin_qty.get()
+        desc = self.txt_desc.get("1.0", tk.END).strip() # Captura la descripción real
+        
         if nom and cod:
-            self.controller.backend.registrar_material(nom, cod, qty, "Sin desc")
-            messagebox.showinfo("Back-end", "Material registrado")
+            self.controller.backend.registrar_material(nom, cod, qty, desc)
+            messagebox.showinfo("Éxito", f"Material '{nom}' registrado en el Back-end")
             self.actualizar_tabla_mat()
+            self.limpiar()
+        else:
+            messagebox.showwarning("Error", "Nombre y Código son obligatorios")
 
     def actualizar_tabla_mat(self):
         for i in self.tree.get_children(): self.tree.delete(i)
